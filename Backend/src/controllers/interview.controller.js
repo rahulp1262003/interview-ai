@@ -1,6 +1,7 @@
 const { PDFParse } = require("pdf-parse");
 const interviewReportModel = require("../models/interviewReport.model");
 const { generateInterviewReport } = require("../services/ai.service");
+const { default: mongoose } = require("mongoose");
 
 /**
  * @name generateInterviewReportByAI
@@ -38,7 +39,7 @@ const generateInterviewReportByAI = async (req, res) => {
             });
         }
 
-        const interviwReportByAI = await generateInterviewReport({resume:resumeContent.text, selfDescription, jobDescription});
+        const interviwReportByAI = await generateInterviewReport({ resume: resumeContent.text, selfDescription, jobDescription });
 
         const interviewReport = await interviewReportModel.create({
             resume: resumeContent.text,
@@ -73,7 +74,18 @@ const generateInterviewReportByAI = async (req, res) => {
 const getInterviewReportById = async (req, res) => {
     try {
         const { interviewId } = req.params;
-        const interviewReport = await interviewReportModel.findOne({ _id: interviewId, user: req.user.id });
+
+        if (!mongoose.Types.ObjectId.isValid(interviewId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid interview ID"
+            });
+        }
+
+        const interviewReport = await interviewReportModel.findOne({
+            _id: interviewId,
+            user: req.user.id
+        });
 
         if (!interviewReport) {
             return res.status(404).json({

@@ -1,8 +1,8 @@
-const { GoogleGenAI } = require("@google/genai");
+const Groq = require("groq-sdk");
 const { z } = require("zod");
 
-const ai = new GoogleGenAI({
-    apiKey: process.env.GOOGLE_GENAI_API_KEY,
+const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
 });
 
 const interviewReportSchema = z.object({
@@ -30,10 +30,10 @@ const interviewReportSchema = z.object({
         tasks: z.array(z.string().describe("List of tasks to be done on this day to follow the preparation plan, e.g,read a specific book or website, practice a specific topic, etc.")),
     })).describe("A day wise plan for the candidate to follow in order to prepare for the interview effectively"),
     title: z.string().describe("The title of the job for which interview report is generated"),
-})
+});
 
 const generateInterviewReport = async ({ resume, selfDescription, jobDescription }) => {
-    const prompt = ` Generate an interview report for a candidate with the following details:
+    const prompt = `Generate an interview report for a candidate with the following details:
     
                 **Resume:**
                 ${resume}
@@ -43,20 +43,34 @@ const generateInterviewReport = async ({ resume, selfDescription, jobDescription
                 
                 **Job Description:**
                 ${jobDescription}
+
+Respond ONLY with a valid JSON object matching this schema exactly — no extra text, no markdown, no code fences:
+${JSON.stringify(z.toJSONSchema(interviewReportSchema), null, 2)}
 `;
 
     console.log("Prompt : ", prompt);
 
-    const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
-        contents: prompt,
-        config: {
-            responseMimeType: "application/json",
-            responseSchema: z.toJSONSchema(interviewReportSchema),
+    const response = await groq.chat.completions.create({
+        model: "llama-3.3-70b-versatile",
+        messages: [
+            {
+                role: "system",
+                content: "You are an expert interview coach. Always respond with valid JSON only. No extra text, no markdown, no code fences.",
+            },
+            {
+                role: "user",
+                content: prompt,
+            },
+        ],
+        response_format: {
+            type: "json_object",
         },
+        temperature: 0.7,
     });
-    console.log("\nResponse from AI : ", response.text);
-    return JSON.parse(response.text);
+
+    const text = response.choices[0].message.content;
+    console.log("\nResponse from AI : ", text);
+    return JSON.parse(text);
 };
 
 module.exports = { generateInterviewReport };

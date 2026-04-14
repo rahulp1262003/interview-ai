@@ -1,11 +1,23 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BookmarkIcon, CheckCircleIcon, WarningCircleIcon, ClockIcon, TargetIcon } from '@phosphor-icons/react'
 import '../styles/interview.scss'
 import { useInterview } from '../hooks/useInterview'
 
 function Interview() {
   const [activeTab, setActiveTab] = useState('overview');
-  const { reportData } = useInterview();
+  const { reportData, loading, fetchReportById } = useInterview();
+
+  useEffect(() => {
+    fetchReportById({
+      jobDescription: "...",
+      selfDescription: "...",
+      resumeFile: null
+    });
+  }, []);
+
+  if (loading) {
+    return <h2>Loading...</h2>;
+  }
 
   // Mock data - replace with actual data from props/context
   // const reportData = {
@@ -87,15 +99,15 @@ function Interview() {
       {/* Header Section */}
       <div className="interview-header">
         <div className="title-section">
-          <h1>{reportData.title}</h1>
+          <h1>{reportData?.title}</h1>
           <div className="match-score-container">
             <div className="match-score-circle">
               <svg viewBox="0 0 100 100">
                 <circle cx="50" cy="50" r="45" className="score-bg" />
-                <circle cx="50" cy="50" r="45" className="score-progress" style={{ strokeDashoffset: 283 - (reportData.matchScore / 100) * 283 }} />
+                <circle cx="50" cy="50" r="45" className="score-progress" style={{ strokeDashoffset: 283 - (reportData?.matchScore / 100) * 283 }} />
               </svg>
               <div className="score-text">
-                <span className="score-value">{reportData.matchScore}%</span>
+                <span className="score-value">{reportData?.matchScore}%</span>
                 <span className="score-label">Match</span>
               </div>
             </div>
@@ -144,7 +156,7 @@ function Interview() {
                 <h2>Skill Gaps to Address</h2>
               </div>
               <div className="skill-gaps-grid">
-                {reportData.skillGap.map((gap, idx) => (
+                {reportData?.skillGap.map((gap, idx) => (
                   <div key={idx} className="skill-gap-card">
                     <div className="skill-gap-header">
                       <h3>{gap.skill}</h3>
@@ -162,21 +174,21 @@ function Interview() {
               <div className="stat-card">
                 <BookmarkIcon size={24} color="#007bff" />
                 <div className="stat-content">
-                  <span className="stat-value">{reportData.technicalQuestions.length}</span>
+                  <span className="stat-value">{reportData?.technicalQuestions.length}</span>
                   <span className="stat-label">Technical Q&A</span>
                 </div>
               </div>
               <div className="stat-card">
                 <CheckCircleIcon size={24} color="#007bff" />
                 <div className="stat-content">
-                  <span className="stat-value">{reportData.behavioralQuestions.length}</span>
+                  <span className="stat-value">{reportData?.behavioralQuestions.length}</span>
                   <span className="stat-label">Behavioral Q&A</span>
                 </div>
               </div>
               <div className="stat-card">
                 <ClockIcon size={24} color="#007bff" />
                 <div className="stat-content">
-                  <span className="stat-value">{reportData.preparationPlan.length}</span>
+                  <span className="stat-value">{reportData?.preparationPlan.length}</span>
                   <span className="stat-label">Days of Prep</span>
                 </div>
               </div>
@@ -192,7 +204,7 @@ function Interview() {
               <p>Questions designed to assess your technical expertise</p>
             </div>
             <div className="questions-list">
-              {reportData.technicalQuestions.map((q, idx) => (
+              {reportData?.technicalQuestions.map((q, idx) => (
                 <div key={idx} className="question-card">
                   <div className="question-number">Q{idx + 1}</div>
                   <div className="question-content">
@@ -222,7 +234,7 @@ function Interview() {
               <p>Questions to assess your soft skills and work experience</p>
             </div>
             <div className="questions-list">
-              {reportData.behavioralQuestions.map((q, idx) => (
+              {reportData?.behavioralQuestions.map((q, idx) => (
                 <div key={idx} className="question-card">
                   <div className="question-number">Q{idx + 1}</div>
                   <div className="question-content">
@@ -252,11 +264,11 @@ function Interview() {
               <h2>Your Preparation Plan</h2>
             </div>
             <div className="preparation-timeline">
-              {reportData.preparationPlan.map((plan, idx) => (
+              {reportData?.preparationPlan.map((plan, idx) => (
                 <div key={idx} className="timeline-item">
                   <div className="timeline-marker">
                     <div className="marker-dot" />
-                    {idx !== reportData.preparationPlan.length - 1 && <div className="marker-line" />}
+                    {idx !== reportData?.preparationPlan.length - 1 && <div className="marker-line" />}
                   </div>
                   <div className="timeline-content">
                     <div className="day-header">

@@ -8,7 +8,7 @@ import { useInterview } from '../hooks/useInterview';
 
 function Home() {
     const [fileName, setFileName] = useState("");
-    const { loading, generatedInterviewReportByAI } = useInterview();
+    const { loading, generateReport } = useInterview();
     const [jobDescription, setJobDescription] = useState("");
     const [selfDescription, setSelfDescription] = useState("");
 
@@ -26,13 +26,31 @@ function Home() {
 
     const handleGenerateReport = async (e) => {
         e.preventDefault();
+
         if (!jobDescription || !selfDescription || !resumeRef.current.files[0]) {
-            alert("Please fill in all fields and upload your resume.");
+            alert("Fill all fields");
             return;
         }
-        const data = await generatedInterviewReportByAI({ jobDescription, selfDescription, resumeFile: resumeRef.current.files[0] });
 
-        navigate(`/interview/reports/${data._id}`);
+        try {
+            const data = await generateReport({
+                jobDescription,
+                selfDescription,
+                resumeFile: resumeRef.current.files[0]
+            });
+
+            if (!data || !data._id) {
+                alert("Failed to generate report. Try again.");
+                return;
+            }
+            console.log("DATA:", data);
+            console.log("ID:", data?._id);
+            navigate(`/interview/reports/${data._id}`);
+
+        } catch (err) {
+            console.error(err);
+            alert("Something went wrong");
+        }
     };
 
     if (loading) {

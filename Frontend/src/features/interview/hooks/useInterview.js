@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { getInterviewReportById, getAllInterviewReports, generateInterviewReport } from "../services/interview.ai";
 import { InterviewContext } from "../interview.context";
+import { defaultInterviewReport } from "../interview.model";
 
 export const useInterview = () => {
     const context = useContext(InterviewContext);
@@ -8,53 +9,68 @@ export const useInterview = () => {
         throw new Error("The context must be used within an InterviewProvider");
     }
 
-    const { setInterviewReport, setInterviewReports, loading, setLoading } = context;
+    const {
+        interviewReport,
+        setInterviewReport,
+        reports,
+        setReports,
+        loading,
+        setLoading
+    } = context;
 
-    const generatedInterviewReportByAI = async ({ jobDescription, selfDescription, resumeFile }) => {
+    // 🔥 normalize API response
+    const normalizeReport = (data) => ({
+        ...defaultInterviewReport,
+        ...data,
+        _id: data?._id || null
+    });
+
+    const generateReport = async (payload) => {
         try {
             setLoading(true);
-            const report = await generateInterviewReport({ jobDescription, selfDescription, resumeFile });
-            setInterviewReport(report.data);
-            return report.data;
-        } catch (error) {
-            console.error("Error generating interview report:", error);
+            const res = await generateInterviewReport(payload);
+            const normalized = normalizeReport(res.data);
+            setInterviewReport(normalized);
+            return normalized;
+        } catch (err) {
+            console.error("Generate error:", err);
         } finally {
             setLoading(false);
         }
     };
 
-    const fetchInterviewReportById = async ({ jobDescription, selfDescription, resumeFile }) => {
+    const fetchReportById = async (payload) => {
         try {
             setLoading(true);
-            const report = await getInterviewReportById({ jobDescription, selfDescription, resumeFile });
-            setInterviewReport(report.data);
-            return report.data;
-        } catch (error) {
-            console.error("Error fetching interview report by ID:", error);
+            const res = await getInterviewReportById(payload);
+            const normalized = normalizeReport(res.data);
+            setInterviewReport(normalized);
+        } catch (err) {
+            console.error("Fetch error:", err);
         } finally {
             setLoading(false);
         }
     };
 
 
-    const fetchAllInterviewReports = async () => {
+    const fetchAllReports = async () => {
         try {
-            setLoading(true)
-            const reports = await getAllInterviewReports();
-            setInterviewReports(reports);
-            return reports;
-        }
-        catch (error) {
-            console.error("Error fetching all interview reports:", error);
+            setLoading(true);
+            const res = await getAllInterviewReports();
+            setReports(res);
+        } catch (err) {
+            console.error("Fetch all error:", err);
         } finally {
             setLoading(false);
         }
     };
 
     return {
-        generatedInterviewReportByAI,
-        fetchInterviewReportById,
-        fetchAllInterviewReports,
-        loading
+        reportData: interviewReport,
+        reports,
+        loading,
+        generateReport,
+        fetchReportById,
+        fetchAllReports
     };
 }
