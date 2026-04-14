@@ -1,4 +1,4 @@
-button {
+@mixin primary-button {
     padding: 12px 10px;
     border-radius: 12px;
     border: none;
@@ -7,7 +7,7 @@ button {
     background-color: #007bff;
     color: white;
     font-size: 15px;
-    font-weight: 600;
+    font-weight: 600;   
     margin: 15px 0;
     width: 100%;
     transition: all 0.2s ease-in-out;
