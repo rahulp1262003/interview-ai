@@ -48,7 +48,7 @@ export const getInterviewReportById = async (interviewId) => {
  */
 export const getAllInterviewReports = async () => {
     try {
-        const response = await authApi.get('/api/interview/reports/all');
+        const response = await authApi.get('/api/interview/all');
         return response.data;
     } catch (error) {
         console.error('Error fetching all interview reports:', error);

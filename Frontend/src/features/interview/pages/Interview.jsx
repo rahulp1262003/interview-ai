@@ -1,303 +1,427 @@
 import React, { useState, useEffect } from 'react'
-import { BookmarkIcon, CheckCircleIcon, WarningCircleIcon, ClockIcon, TargetIcon } from '@phosphor-icons/react'
-import '../styles/interview.scss'
+import { useParams } from 'react-router'
+import {
+  ConfigProvider,
+  theme,
+  Tabs,
+  Card,
+  Tag,
+  Progress,
+  Statistic,
+  Steps,
+  Input,
+  Spin,
+  Typography,
+  Row,
+  Col,
+  Space,
+  Checkbox,
+  Badge,
+} from 'antd'
+import {
+  BookOutlined,
+  CheckCircleOutlined,
+  ClockCircleOutlined,
+  AimOutlined,
+  RobotOutlined,
+  UserOutlined,
+  BulbOutlined,
+  CalendarOutlined,
+} from '@ant-design/icons'
 import { useInterview } from '../hooks/useInterview'
 
+const { Title, Text, Paragraph } = Typography
+
+const severityConfig = {
+  high: { color: 'error', label: 'High Priority', hex: '#ff4d4f' },
+  medium: { color: 'warning', label: 'Medium Priority', hex: '#faad14' },
+  low: { color: 'success', label: 'Low Priority', hex: '#52c41a' },
+}
+
 function Interview() {
-  const [activeTab, setActiveTab] = useState('overview');
-  const { reportData, loading, fetchReportById } = useInterview();
+  const { interviewId } = useParams()
+  const { reportData, loading, fetchReportById } = useInterview()
 
   useEffect(() => {
-    fetchReportById({
-      jobDescription: "...",
-      selfDescription: "...",
-      resumeFile: null
-    });
-  }, []);
+    if (interviewId) fetchReportById(interviewId)
+  }, [interviewId])
 
-  if (loading) {
-    return <h2>Loading...</h2>;
+  const matchScore = reportData?.matchScore ?? 0
+
+  const getScoreColor = (score) => {
+    if (score >= 70) return '#52c41a'
+    if (score >= 40) return '#faad14'
+    return '#ff4d4f'
   }
 
-  // Mock data - replace with actual data from props/context
-  // const reportData = {
-  //   title: "Senior Frontend Developer - Tech Corp",
-  //   matchScore: 78,
-  //   technicalQuestions: [
-  //     {
-  //       question: "Explain React hooks and their use cases",
-  //       intention: "Assess understanding of React fundamentals",
-  //       answer: ""
-  //     },
-  //     {
-  //       question: "What is the difference between state and props?",
-  //       intention: "Check React concepts knowledge",
-  //       answer: ""
-  //     },
-  //     {
-  //       question: "How do you handle state management in large applications?",
-  //       intention: "Evaluate state management experience",
-  //       answer: ""
-  //     }
-  //   ],
-  //   behavioralQuestions: [
-  //     {
-  //       question: "Tell me about a time you faced a challenging project",
-  //       intention: "Assess problem-solving skills",
-  //       answer: ""
-  //     },
-  //     {
-  //       question: "How do you handle conflicts with team members?",
-  //       intention: "Evaluate teamwork and communication",
-  //       answer: ""
-  //     }
-  //   ],
-  //   skillGap: [
-  //     { skill: "TypeScript", severity: "high" },
-  //     { skill: "AWS", severity: "medium" },
-  //     { skill: "Docker", severity: "low" }
-  //   ],
-  //   preparationPlan: [
-  //     {
-  //       day: "Day 1",
-  //       focus: "React Fundamentals",
-  //       tasks: ["Review hooks documentation", "Practice custom hooks", "Study useEffect lifecycle"]
-  //     },
-  //     {
-  //       day: "Day 2",
-  //       focus: "State Management",
-  //       tasks: ["Learn Redux basics", "Practice Context API", "Study Redux Toolkit"]
-  //     },
-  //     {
-  //       day: "Day 3",
-  //       focus: "System Design",
-  //       tasks: ["Study component architecture", "Learn design patterns", "Practice scalability concepts"]
-  //     }
-  //   ]
-  // };
+  const tabItems = [
+    {
+      key: 'overview',
+      label: (
+        <Space>
+          <AimOutlined />
+          Overview
+        </Space>
+      ),
+      children: (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+          {/* Quick Stats */}
+          <Row gutter={[16, 16]}>
+            <Col xs={24} sm={8}>
+              <Card
+                styles={{
+                  body: { display: 'flex', alignItems: 'center', gap: 16 },
+                }}
+              >
+                <BookOutlined style={{ fontSize: 32, color: '#1677ff' }} />
+                <Statistic
+                  title={<Text style={{ color: '#888' }}>Technical Q&A</Text>}
+                  value={reportData?.technicalQuestions?.length ?? 0}
+                  valueStyle={{ color: '#1677ff', fontWeight: 700 }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Card
+                styles={{
+                  body: { display: 'flex', alignItems: 'center', gap: 16 },
+                }}
+              >
+                <CheckCircleOutlined style={{ fontSize: 32, color: '#52c41a' }} />
+                <Statistic
+                  title={<Text style={{ color: '#888' }}>Behavioral Q&A</Text>}
+                  value={reportData?.behavioralQuestions?.length ?? 0}
+                  valueStyle={{ color: '#52c41a', fontWeight: 700 }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={8}>
+              <Card
+                styles={{
+                  body: { display: 'flex', alignItems: 'center', gap: 16 },
+                }}
+              >
+                <ClockCircleOutlined style={{ fontSize: 32, color: '#faad14' }} />
+                <Statistic
+                  title={<Text style={{ color: '#888' }}>Days of Prep</Text>}
+                  value={reportData?.preparationPlan?.length ?? 0}
+                  valueStyle={{ color: '#faad14', fontWeight: 700 }}
+                />
+              </Card>
+            </Col>
+          </Row>
 
-  const getSeverityColor = (severity) => {
-    switch (severity) {
-      case 'high': return '#ff4444';
-      case 'medium': return '#ffaa00';
-      case 'low': return '#44bb44';
-      default: return '#007bff';
-    }
-  };
-
-  const getSeverityLabel = (severity) => {
-    switch (severity) {
-      case 'high': return 'High Priority';
-      case 'medium': return 'Medium Priority';
-      case 'low': return 'Low Priority';
-      default: return 'Unknown';
-    }
-  };
-
-  return (
-    <main className='interview'>
-      {/* Header Section */}
-      <div className="interview-header">
-        <div className="title-section">
-          <h1>{reportData?.title}</h1>
-          <div className="match-score-container">
-            <div className="match-score-circle">
-              <svg viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" className="score-bg" />
-                <circle cx="50" cy="50" r="45" className="score-progress" style={{ strokeDashoffset: 283 - (reportData?.matchScore / 100) * 283 }} />
-              </svg>
-              <div className="score-text">
-                <span className="score-value">{reportData?.matchScore}%</span>
-                <span className="score-label">Match</span>
-              </div>
-            </div>
+          {/* Skill Gaps */}
+          <Card
+            title={
+              <Space>
+                <AimOutlined style={{ color: '#1677ff' }} />
+                <Title level={4} style={{ margin: 0, color: '#fff' }}>
+                  Skill Gaps to Address
+                </Title>
+              </Space>
+            }
+          >
+            <Row gutter={[12, 12]}>
+              {reportData?.skillGap?.map((gap, idx) => {
+                const cfg = severityConfig[gap.severity] ?? { color: 'default', label: 'Unknown', hex: '#1677ff' }
+                return (
+                  <Col key={idx} xs={24} sm={12} md={8}>
+                    <Card
+                      size="small"
+                      style={{ borderColor: cfg.hex + '44', background: cfg.hex + '0d' }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <Text strong style={{ color: '#e0e0e0', fontSize: 15 }}>
+                          {gap.skill}
+                        </Text>
+                        <Tag color={cfg.color} style={{ fontWeight: 600 }}>
+                          {cfg.label}
+                        </Tag>
+                      </div>
+                    </Card>
+                  </Col>
+                )
+              })}
+            </Row>
+          </Card>
+        </div>
+      ),
+    },
+    {
+      key: 'technical',
+      label: (
+        <Space>
+          <RobotOutlined />
+          Technical Questions
+        </Space>
+      ),
+      children: (
+        <div>
+          <Paragraph style={{ color: '#888', marginBottom: 20 }}>
+            Questions designed to assess your technical expertise
+          </Paragraph>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {reportData?.technicalQuestions?.map((q, idx) => (
+              <Card
+                key={idx}
+                style={{ borderColor: '#1677ff22' }}
+                title={
+                  <Space align="start">
+                    <Badge
+                      count={`Q${idx + 1}`}
+                      style={{
+                        backgroundColor: '#1677ff',
+                        fontWeight: 700,
+                        fontSize: 13,
+                        borderRadius: 8,
+                        padding: '0 10px',
+                        minWidth: 44,
+                      }}
+                    />
+                    <Text strong style={{ color: '#e0e0e0', fontSize: 15, lineHeight: 1.5 }}>
+                      {q.question}
+                    </Text>
+                  </Space>
+                }
+              >
+                <Space direction="vertical" style={{ width: '100%' }} size={12}>
+                  <div>
+                    <Text style={{ color: '#1677ff', fontWeight: 600 }}>Intention: </Text>
+                    <Text style={{ color: '#aaa' }}>{q.intention}</Text>
+                  </div>
+                  <Input.TextArea
+                    placeholder="Write your answer here..."
+                    defaultValue={q.answer}
+                    autoSize={{ minRows: 3, maxRows: 8 }}
+                    style={{ background: '#111111', borderColor: '#2a2a2a', color: '#e0e0e0' }}
+                  />
+                </Space>
+              </Card>
+            ))}
           </div>
         </div>
-      </div>
-
-      {/* Navigation Tabs */}
-      <div className="tabs-container">
-        <button
-          className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
-          onClick={() => setActiveTab('overview')}
-        >
-          Overview
-        </button>
-        <button
-          className={`tab ${activeTab === 'technical' ? 'active' : ''}`}
-          onClick={() => setActiveTab('technical')}
-        >
-          Technical Questions
-        </button>
-        <button
-          className={`tab ${activeTab === 'behavioral' ? 'active' : ''}`}
-          onClick={() => setActiveTab('behavioral')}
-        >
+      ),
+    },
+    {
+      key: 'behavioral',
+      label: (
+        <Space>
+          <UserOutlined />
           Behavioral Questions
-        </button>
-        <button
-          className={`tab ${activeTab === 'preparation' ? 'active' : ''}`}
-          onClick={() => setActiveTab('preparation')}
-        >
+        </Space>
+      ),
+      children: (
+        <div>
+          <Paragraph style={{ color: '#888', marginBottom: 20 }}>
+            Questions to assess your soft skills and work experience
+          </Paragraph>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {reportData?.behavioralQuestions?.map((q, idx) => (
+              <Card
+                key={idx}
+                style={{ borderColor: '#52c41a22' }}
+                title={
+                  <Space align="start">
+                    <Badge
+                      count={`Q${idx + 1}`}
+                      style={{
+                        backgroundColor: '#52c41a',
+                        fontWeight: 700,
+                        fontSize: 13,
+                        borderRadius: 8,
+                        padding: '0 10px',
+                        minWidth: 44,
+                      }}
+                    />
+                    <Text strong style={{ color: '#e0e0e0', fontSize: 15, lineHeight: 1.5 }}>
+                      {q.question}
+                    </Text>
+                  </Space>
+                }
+              >
+                <Space direction="vertical" style={{ width: '100%' }} size={12}>
+                  <div>
+                    <Text style={{ color: '#52c41a', fontWeight: 600 }}>Intention: </Text>
+                    <Text style={{ color: '#aaa' }}>{q.intention}</Text>
+                  </div>
+                  <Input.TextArea
+                    placeholder="Write your answer here..."
+                    defaultValue={q.answer}
+                    autoSize={{ minRows: 3, maxRows: 8 }}
+                    style={{ background: '#111111', borderColor: '#2a2a2a', color: '#e0e0e0' }}
+                  />
+                </Space>
+              </Card>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      key: 'preparation',
+      label: (
+        <Space>
+          <CalendarOutlined />
           Preparation Plan
-        </button>
-      </div>
-
-      {/* Content Sections */}
-      <div className="content-wrapper">
-
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
-          <section className="overview-section">
-            {/* Skill Gaps */}
-            <div className="skill-gaps-container">
-              <div className="section-header">
-                <TargetIcon size={32} color="#007bff" weight="duotone" />
-                <h2>Skill Gaps to Address</h2>
-              </div>
-              <div className="skill-gaps-grid">
-                {reportData?.skillGap.map((gap, idx) => (
-                  <div key={idx} className="skill-gap-card">
-                    <div className="skill-gap-header">
-                      <h3>{gap.skill}</h3>
-                      <span className="severity-badge" style={{ backgroundColor: getSeverityColor(gap.severity) }}>
-                        {getSeverityLabel(gap.severity)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="quick-stats">
-              <div className="stat-card">
-                <BookmarkIcon size={24} color="#007bff" />
-                <div className="stat-content">
-                  <span className="stat-value">{reportData?.technicalQuestions.length}</span>
-                  <span className="stat-label">Technical Q&A</span>
+        </Space>
+      ),
+      children: (
+        <Card
+          title={
+            <Space>
+              <ClockCircleOutlined style={{ color: '#faad14' }} />
+              <Title level={4} style={{ margin: 0, color: '#fff' }}>
+                Your Preparation Plan
+              </Title>
+            </Space>
+          }
+        >
+          <Steps
+            orientation="vertical"
+            current={-1}
+            items={reportData?.preparationPlan?.map((plan, idx) => ({
+              title: (
+                <Space style={{ marginBottom: 4 }}>
+                  <Text strong style={{ color: '#e0e0e0', fontSize: 16 }}>
+                    {plan.day}
+                  </Text>
+                  <Tag color="blue" style={{ fontWeight: 600 }}>
+                    {plan.focus}
+                  </Tag>
+                </Space>
+              ),
+              description: (
+                <Space
+                  direction="vertical"
+                  size={8}
+                  style={{ width: '100%', paddingBottom: 16 }}
+                >
+                  {plan.tasks?.map((task, taskIdx) => (
+                    <Checkbox key={taskIdx} style={{ color: '#ccc', fontSize: 14 }}>
+                      {task}
+                    </Checkbox>
+                  ))}
+                </Space>
+              ),
+              icon: (
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    background: 'linear-gradient(135deg, #1677ff, #003064)',
+                    boxShadow: '0 0 12px rgba(22,119,255,0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#fff',
+                    fontWeight: 700,
+                    fontSize: 13,
+                  }}
+                >
+                  {idx + 1}
                 </div>
-              </div>
-              <div className="stat-card">
-                <CheckCircleIcon size={24} color="#007bff" />
-                <div className="stat-content">
-                  <span className="stat-value">{reportData?.behavioralQuestions.length}</span>
-                  <span className="stat-label">Behavioral Q&A</span>
-                </div>
-              </div>
-              <div className="stat-card">
-                <ClockIcon size={24} color="#007bff" />
-                <div className="stat-content">
-                  <span className="stat-value">{reportData?.preparationPlan.length}</span>
-                  <span className="stat-label">Days of Prep</span>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
+              ),
+            })) ?? []}
+          />
+        </Card>
+      ),
+    },
+  ]
 
-        {/* Technical Questions Tab */}
-        {activeTab === 'technical' && (
-          <section className="questions-section">
-            <div className="section-header">
-              <h2>Technical Interview Questions</h2>
-              <p>Questions designed to assess your technical expertise</p>
-            </div>
-            <div className="questions-list">
-              {reportData?.technicalQuestions.map((q, idx) => (
-                <div key={idx} className="question-card">
-                  <div className="question-number">Q{idx + 1}</div>
-                  <div className="question-content">
-                    <h3>{q.question}</h3>
-                    <div className="question-meta">
-                      <span className="intention">
-                        <strong>Intention:</strong> {q.intention}
-                      </span>
-                    </div>
-                    <textarea
-                      placeholder="Write your answer here..."
-                      className="answer-input"
-                      defaultValue={q.answer}
+  return (
+    <ConfigProvider
+      theme={{
+        algorithm: theme.darkAlgorithm,
+        token: {
+          colorPrimary: '#1677ff',
+          colorBgContainer: '#0d0d0d',
+          colorBgElevated: '#141414',
+          borderRadius: 12,
+          colorBorder: '#2a2a2a',
+          fontFamily: "'Inter', 'Segoe UI', sans-serif",
+        },
+        components: {
+          Card: {
+            colorBgContainer: '#0d0d0d',
+            borderRadius: 16,
+          },
+          Tabs: {
+            colorBgContainer: 'transparent',
+            itemSelectedColor: '#1677ff',
+            inkBarColor: '#1677ff',
+          },
+        },
+      }}
+    >
+      <div
+        style={{
+          minHeight: '100vh',
+          background: '#000000',
+          padding: '2rem',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 24,
+        }}
+      >
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+            <Spin size="large" tip="Loading your report..." />
+          </div>
+        ) : (
+          <>
+            {/* Header */}
+            <Card>
+              <Row align="middle" justify="space-between" gutter={[24, 24]}>
+                <Col xs={24} md={16}>
+                  <Space direction="vertical" size={4}>
+                    <Text style={{ color: '#1677ff', fontWeight: 600, fontSize: 13, textTransform: 'uppercase', letterSpacing: 1 }}>
+                      Interview Report
+                    </Text>
+                    <Title level={2} style={{ margin: 0, color: '#ffffff', lineHeight: 1.3 }}>
+                      {reportData?.title ?? 'No Title'}
+                    </Title>
+                  </Space>
+                </Col>
+                <Col xs={24} md={8} style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <Progress
+                      type="circle"
+                      percent={matchScore}
+                      size={130}
+                      strokeColor={getScoreColor(matchScore)}
+                      railColor="#2a3347"
+                      strokeWidth={8}
+                      format={(pct) => (
+                        <div>
+                          <div style={{ fontSize: 28, fontWeight: 700, color: getScoreColor(matchScore) }}>
+                            {pct}%
+                          </div>
+                          <div style={{ fontSize: 11, color: '#888', textTransform: 'uppercase', letterSpacing: 1 }}>
+                            Match
+                          </div>
+                        </div>
+                      )}
                     />
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+                </Col>
+              </Row>
+            </Card>
 
-        {/* Behavioral Questions Tab */}
-        {activeTab === 'behavioral' && (
-          <section className="questions-section">
-            <div className="section-header">
-              <h2>Behavioral Interview Questions</h2>
-              <p>Questions to assess your soft skills and work experience</p>
-            </div>
-            <div className="questions-list">
-              {reportData?.behavioralQuestions.map((q, idx) => (
-                <div key={idx} className="question-card">
-                  <div className="question-number">Q{idx + 1}</div>
-                  <div className="question-content">
-                    <h3>{q.question}</h3>
-                    <div className="question-meta">
-                      <span className="intention">
-                        <strong>Intention:</strong> {q.intention}
-                      </span>
-                    </div>
-                    <textarea
-                      placeholder="Write your answer here..."
-                      className="answer-input"
-                      defaultValue={q.answer}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+            {/* Tabs */}
+            <Card style={{ flex: 1 }}>
+              <Tabs
+                defaultActiveKey="overview"
+                items={tabItems}
+                size="large"
+                animated={{ inkBar: true, tabPane: true }}
+              />
+            </Card>
+          </>
         )}
-
-        {/* Preparation Plan Tab */}
-        {activeTab === 'preparation' && (
-          <section className="preparation-section">
-            <div className="section-header">
-              <ClockIcon size={32} color="#007bff" weight="duotone" />
-              <h2>Your Preparation Plan</h2>
-            </div>
-            <div className="preparation-timeline">
-              {reportData?.preparationPlan.map((plan, idx) => (
-                <div key={idx} className="timeline-item">
-                  <div className="timeline-marker">
-                    <div className="marker-dot" />
-                    {idx !== reportData?.preparationPlan.length - 1 && <div className="marker-line" />}
-                  </div>
-                  <div className="timeline-content">
-                    <div className="day-header">
-                      <h3>{plan.day}</h3>
-                      <span className="focus-tag">{plan.focus}</span>
-                    </div>
-                    <ul className="tasks-list">
-                      {plan.tasks.map((task, taskIdx) => (
-                        <li key={taskIdx}>
-                          <input type="checkbox" id={`task-${idx}-${taskIdx}`} />
-                          <label htmlFor={`task-${idx}-${taskIdx}`}>{task}</label>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
       </div>
-
-      {/* Action Buttons */}
-      <div className="action-buttons">
-        <button className="btn btn-secondary">Save Progress</button>
-        <button className="btn btn-primary">Submit Interview</button>
-      </div>
-    </main>
+    </ConfigProvider>
   )
 }
 

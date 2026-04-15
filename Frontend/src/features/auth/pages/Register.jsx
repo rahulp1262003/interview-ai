@@ -1,48 +1,157 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router';
-import { useNavigate } from 'react-router';
-import { useAuth } from '../hooks/useAuth';
+import React from 'react'
+import { Link, useNavigate } from 'react-router'
+import {
+  ConfigProvider,
+  theme,
+  Form,
+  Input,
+  Button,
+  Card,
+  Typography,
+  Space,
+  message,
+} from 'antd'
+import {
+  MailOutlined,
+  LockOutlined,
+  UserOutlined,
+  ThunderboltOutlined,
+} from '@ant-design/icons'
+import { useAuth } from '../hooks/useAuth'
+import Paragraph from 'antd/es/skeleton/Paragraph'
+
+const { Title, Text } = Typography
 
 const Register = () => {
+  const { loading, handleRegister } = useAuth()
+  const navigate = useNavigate()
 
-  const { loading, handleRegister } = useAuth();
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
-
-  const preventFormSubmit = async (e) => {
-    e.preventDefault();
-    await handleRegister({ username, email, password });
-    navigate("/login");
-  }
-
-  if (loading) {
-    return <main className='loading'>Loading...</main>
+  const onFinish = async (values) => {
+    try {
+      await handleRegister(values)
+      message.success('Account created successfully!')
+      navigate('/login')
+    } catch (error) {
+      console.error('Registration error:', error)
+      message.error('Registration failed. Please try again.')
+    }
   }
 
   return (
-    <main>
-      <div className="form-container">
-        <h1>Register<span>.</span></h1>
-        <form onSubmit={preventFormSubmit}>
-          <div className='input-group'>
-            <label htmlFor="username">Username</label>
-            <input type="text" name='username' placeholder='Enter username' required value={username} onChange={(e) => setUsername(e.target.value)} />
+    <ConfigProvider
+      theme={{
+        algorithm: theme.darkAlgorithm,
+        token: {
+          colorPrimary: '#1677ff',
+          colorBgContainer: '#0d0d0d',
+          borderRadius: 12,
+          colorBorder: '#2a2a2a',
+          fontFamily: "'Inter', sans-serif",
+        },
+      }}
+    >
+      <div
+        style={{
+          minHeight: '100vh',
+          background: '#000000',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '20px',
+        }}
+      >
+        <Card
+          style={{ width: '100%', maxWidth: 400, border: '1px solid #222', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}
+          styles={{ body: { padding: '40px 32px' } }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <Space align="center" style={{ marginBottom: 12 }}>
+              <ThunderboltOutlined style={{ fontSize: 24, color: '#1677ff' }} />
+              <Title level={2} style={{ margin: 0, fontWeight: 800 }}>
+                Register<span style={{ color: '#1677ff' }}>.</span>
+              </Title>
+            </Space>
+            <Paragraph style={{ color: '#555' }}>Create your Interview AI account</Paragraph>
           </div>
-          <div className='input-group'>
-            <label htmlFor="email">Email</label>
-            <input type="email" name='email' placeholder='Enter email' required value={email} onChange={(e) => setEmail(e.target.value)} />
+
+          <Form
+            name="register"
+            layout="vertical"
+            onFinish={onFinish}
+            autoComplete="off"
+            requiredMark={false}
+          >
+            <Form.Item
+              name="username"
+              label={<Text style={{ color: '#aaa', fontSize: 13 }}>Username</Text>}
+              rules={[{ required: true, message: 'Please enter a username' }]}
+            >
+              <Input
+                prefix={<UserOutlined style={{ color: '#555' }} />}
+                placeholder="johndoe"
+                style={{ height: 45, background: '#111', borderColor: '#2a2a2a' }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="email"
+              label={<Text style={{ color: '#aaa', fontSize: 13 }}>Email Address</Text>}
+              rules={[
+                { required: true, message: 'Please enter your email' },
+                { type: 'email', message: 'Please enter a valid email' },
+              ]}
+            >
+              <Input
+                prefix={<MailOutlined style={{ color: '#555' }} />}
+                placeholder="email@example.com"
+                style={{ height: 45, background: '#111', borderColor: '#2a2a2a' }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              label={<Text style={{ color: '#aaa', fontSize: 13 }}>Password</Text>}
+              rules={[
+                { required: true, message: 'Please enter your password' },
+                { min: 6, message: 'Password must be at least 6 characters' },
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined style={{ color: '#555' }} />}
+                placeholder="••••••••"
+                style={{ height: 45, background: '#111', borderColor: '#2a2a2a' }}
+              />
+            </Form.Item>
+
+            <Form.Item style={{ marginTop: 24 }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                loading={loading}
+                style={{
+                  height: 45,
+                  fontWeight: 600,
+                  background: 'linear-gradient(135deg, #1677ff, #003064)',
+                  border: 'none',
+                }}
+              >
+                Register
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <div style={{ textAlign: 'center', marginTop: 16 }}>
+            <Text style={{ color: '#555' }}>
+              Already have an account?{' '}
+              <Link to="/login" style={{ color: '#1677ff', fontWeight: 500 }}>
+                Login Now
+              </Link>
+            </Text>
           </div>
-          <div className='input-group'>
-            <label htmlFor="password">Password</label>
-            <input type="password" placeholder='Enter password' required value={password} onChange={(e) => setPassword(e.target.value)} />
-          </div>
-          <button className='primary-button' type='submit'>Register</button>
-          <p>Already have an account? <Link to="/login">Login Now</Link></p>
-        </form>
+        </Card>
       </div>
-    </main>
+    </ConfigProvider>
   )
 }
 

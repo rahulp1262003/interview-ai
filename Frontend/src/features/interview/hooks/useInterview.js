@@ -39,10 +39,14 @@ export const useInterview = () => {
         }
     };
 
-    const fetchReportById = async (payload) => {
+    const fetchReportById = async (id) => {
         try {
             setLoading(true);
-            const res = await getInterviewReportById(payload);
+            if (!id || typeof id !== "string") {
+                console.error("Invalid ID:", id);
+                return;
+            }
+            const res = await getInterviewReportById(id);
             const normalized = normalizeReport(res.data);
             setInterviewReport(normalized);
         } catch (err) {
@@ -57,7 +61,8 @@ export const useInterview = () => {
         try {
             setLoading(true);
             const res = await getAllInterviewReports();
-            setReports(res);
+            const normalized = res.data.map(normalizeReport);
+            setReports(normalized);
         } catch (err) {
             console.error("Fetch all error:", err);
         } finally {
