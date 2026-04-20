@@ -29,7 +29,7 @@ interviewRouter.get(
 );
 
 /**
- * @rute GET /api/interview/:interviewId
+ * @route GET /api/interview/:interviewId
  * @desc Get interview report by ID
  * @access Private
  */
@@ -37,6 +37,17 @@ interviewRouter.get(
     "/reports/:interviewId",
     authMiddleware.authUser,
     interviewController.getInterviewReportById
+);
+
+/**
+ * @route DELETE /api/interview/:interviewId
+ * @desc Delete interview report
+ * @access Private
+*/
+interviewRouter.delete(
+    "/delete/:interviewId",
+    authMiddleware.authUser,
+    interviewController.deleteInterviewReport
 );
 
 

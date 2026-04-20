@@ -18,6 +18,7 @@ import {
   Tag,
   Empty,
   Divider,
+  Modal,
 } from 'antd'
 import {
   ThunderboltOutlined,
@@ -27,6 +28,7 @@ import {
   BulbOutlined,
   ArrowRightOutlined,
   FileOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons'
 import { useInterview } from '../hooks/useInterview'
 
@@ -38,7 +40,10 @@ function Home() {
   const [jobDescription, setJobDescription] = useState('')
   const [selfDescription, setSelfDescription] = useState('')
   const [resumeFile, setResumeFile] = useState(null)
-  const { loading, generateReport, reports, fetchAllReports } = useInterview()
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false)
+  const [reportToDelete, setReportToDelete] = useState(null)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const { loading, generateReport, reports, fetchAllReports, deleteReportById } = useInterview()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -78,6 +83,32 @@ function Home() {
     showUploadList: true,
   }
 
+  const handleDeleteClick = (e, report) => {
+    e.stopPropagation()
+    setReportToDelete(report)
+    setIsDeleteModalVisible(true)
+  }
+
+  const handleConfirmDelete = async () => {
+    if (!reportToDelete) return
+    setDeleteLoading(true)
+    try {
+      await deleteReportById({ id: reportToDelete._id, title: reportToDelete.title })
+      message.success('Report deleted successfully')
+      setIsDeleteModalVisible(false)
+      setReportToDelete(null)
+    } catch (error) {
+      message.error('Failed to delete report')
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalVisible(false)
+    setReportToDelete(null)
+  }
+
   return (
     <ConfigProvider
       theme={{
@@ -102,6 +133,13 @@ function Home() {
         },
       }}
     >
+      <style>
+        {`
+          .report-card:hover .delete-btn {
+            opacity: 1 !important;
+          }
+        `}
+      </style>
       <div
         style={{
           minHeight: '100vh',
@@ -140,7 +178,7 @@ function Home() {
           <Row gutter={[32, 32]}>
             {/* Left Column — Your Profile */}
             <Col xs={24} md={10}>
-              <Space direction="vertical" style={{ width: '100%' }} size={32}>
+              <Space orientation="vertical" style={{ width: '100%' }} size={32}>
                 <Card
                   title={
                     <Space>
@@ -246,13 +284,21 @@ function Home() {
               <Spin size="large" />
             </div>
           ) : reports.length === 0 ? (
-            <Empty description={<Text style={{ color: '#444' }}>No reports found yet.</Text>} />
+            <Empty
+              image="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
+              description={
+                <Space orientation="horizontal" size={8}>
+                  <Text style={{ color: '#444' }}>No reports found yet.</Text>
+                </Space>
+              }
+            />
           ) : (
             <Row gutter={[24, 24]}>
               {reports.slice(0, 6).map((report) => (
                 <Col xs={24} sm={12} lg={8} key={report._id}>
                   <Card
                     hoverable
+                    className="report-card"
                     onClick={() => navigate(`/interview/reports/${report._id}`)}
                     style={{ background: '#0d0d0d', border: '1px solid #222' }}
                     styles={{ body: { padding: 20 } }}
@@ -270,7 +316,17 @@ function Home() {
                           <Text style={{ color: '#555', fontSize: 12 }}>Match Score: {report.matchScore}%</Text>
                         </div>
                       </Space>
-                      <ArrowRightOutlined style={{ color: '#1677ff', opacity: 0.5 }} />
+                      <Space>
+                        <Button
+                          type="text"
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={(e) => handleDeleteClick(e, report)}
+                          className="delete-btn"
+                          style={{ opacity: 0, transition: 'opacity 0.3s' }}
+                        />
+                        <ArrowRightOutlined style={{ color: '#1677ff', opacity: 0.5 }} />
+                      </Space>
                     </div>
                   </Card>
                 </Col>
@@ -279,6 +335,26 @@ function Home() {
           )}
         </div>
       </div>
+      <Modal
+        title="Delete Report"
+        open={isDeleteModalVisible}
+        onOk={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        confirmLoading={deleteLoading}
+        okText="Delete"
+        okButtonProps={{ danger: true }}
+        centered
+        styles={{
+          content: { backgroundColor: '#141414', color: '#e0e0e0' },
+          header: { backgroundColor: '#141414', color: '#fff' },
+          title: { color: '#fff' }
+        }}
+      >
+        <p style={{ color: '#e0e0e0' }}>Are you sure you want to permanently delete this report?</p>
+        {reportToDelete && (
+          <p style={{ color: '#e0e0e0' }}><strong>{reportToDelete.title}</strong></p>
+        )}
+      </Modal>
     </ConfigProvider>
   )
 }

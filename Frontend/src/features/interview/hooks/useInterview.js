@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { getInterviewReportById, getAllInterviewReports, generateInterviewReport } from "../services/interview.ai";
+import { getInterviewReportById, getAllInterviewReports, generateInterviewReport, deleteInterviewReportById } from "../services/interview.ai";
 import { InterviewContext } from "../interview.context";
 import { defaultInterviewReport } from "../interview.model";
 
@@ -70,12 +70,28 @@ export const useInterview = () => {
         }
     };
 
+    const deleteReportById = async (payload) => {
+        try {
+            if (!payload || typeof payload !== "object") {
+                console.error("Invalid Payload:", payload);
+                return;
+            }
+            const res = await deleteInterviewReportById(payload);
+            setReports((prev) => prev.filter(r => r._id !== payload.id));
+            return res.data;
+        } catch (err) {
+            console.error("Delete error:", err);
+            throw err;
+        }
+    };
+
     return {
         reportData: interviewReport,
         reports,
         loading,
         generateReport,
         fetchReportById,
-        fetchAllReports
+        fetchAllReports,
+        deleteReportById
     };
 }

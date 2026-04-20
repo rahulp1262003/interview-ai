@@ -77,7 +77,7 @@ function Interview() {
                 <Statistic
                   title={<Text style={{ color: '#888' }}>Technical Q&A</Text>}
                   value={reportData?.technicalQuestions?.length ?? 0}
-                  valueStyle={{ color: '#1677ff', fontWeight: 700 }}
+                  styles={{ content: { color: '#1677ff', fontWeight: 700 } }}
                 />
               </Card>
             </Col>
@@ -367,7 +367,7 @@ function Interview() {
       >
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-            <Spin size="large" tip="Loading your report..." />
+            <Spin size="large" description="Loading your report..." />
           </div>
         ) : (
           <>

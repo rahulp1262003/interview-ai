@@ -130,8 +130,55 @@ const getAllInterviewReports = async (req, res) => {
     }
 };
 
+/** 
+ * @name deleteInterviewReport
+ * @desc Delete interview report
+ * @route DELETE /api/interview/:interviewId
+ * @access Private
+ */
+const deleteInterviewReport = async (req, res) => {
+    try {
+        const { interviewId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(interviewId)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid interview ID"
+            });
+        }
+
+        const interviewReport = await interviewReportModel.findOneAndDelete({
+            _id: interviewId,
+            user: req.user.id
+        });
+
+        if (!interviewReport) {
+            return res.status(404).json({
+                success: false,
+                message: "Interview report not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Interview report deleted successfully",
+            data: {
+                id: interviewReport._id,
+                title: interviewReport.title,
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to delete interview report"
+        });
+    }
+};
+
 module.exports = {
     generateInterviewReportByAI,
     getInterviewReportById,
-    getAllInterviewReports
+    getAllInterviewReports,
+    deleteInterviewReport
 }

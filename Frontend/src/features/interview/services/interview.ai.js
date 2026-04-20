@@ -55,3 +55,20 @@ export const getAllInterviewReports = async () => {
         throw error;
     }
 }
+
+/**
+ * @description Service to delete interview report by ID from the server
+ * @param {*} payload {id,title}
+ * @return interview report data
+ */
+export const deleteInterviewReportById = async (payload) => {
+    try {
+        const response = await authApi.delete(`/api/interview/delete/${payload.id}`,{
+            data:payload
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting interview report by ID:', error);
+        throw error;
+    }
+}
