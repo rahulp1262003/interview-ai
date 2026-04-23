@@ -9,7 +9,6 @@ import {
   Card,
   Typography,
   Space,
-  message,
 } from 'antd'
 import {
   MailOutlined,
@@ -18,12 +17,14 @@ import {
 } from '@ant-design/icons'
 import { useAuth } from '../hooks/useAuth'
 import Paragraph from 'antd/es/skeleton/Paragraph'
+import { App } from 'antd'
 
 const { Title, Text } = Typography
 
 const Login = () => {
   const { loading, handleLogin } = useAuth()
   const navigate = useNavigate()
+  const { message } = App.useApp();
 
   const onFinish = async (values) => {
     try {

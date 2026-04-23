@@ -31,6 +31,7 @@ import {
   DeleteOutlined,
 } from '@ant-design/icons'
 import { useInterview } from '../hooks/useInterview'
+import { useAuth } from '../../auth/hooks/useAuth'
 
 const { Title, Text, Paragraph } = Typography
 const { TextArea } = Input
@@ -46,7 +47,9 @@ function Home() {
   const { loading, generateReport, reports, fetchAllReports, deleteReportById } = useInterview()
   const navigate = useNavigate()
 
+  // const { user, loading: authLoading } = useAuth();
   useEffect(() => {
+    // if (!user || authLoading) return;
     fetchAllReports()
   }, [])
 
@@ -187,7 +190,7 @@ function Home() {
                     </Space>
                   }
                 >
-                  <Space direction="vertical" style={{ width: '100%' }} size={24}>
+                  <Space orientation="vertical" style={{ width: '100%' }} size={24}>
                     <div>
                       <Text strong style={{ display: 'block', marginBottom: 12, color: '#e0e0e0' }}>
                         Resume Upload (PDF)

@@ -1,56 +1,42 @@
 import axios from "axios";
 
-const authApi = axios.create({
-    baseURL: "http://localhost:4000/api/auth",
+const authApi = new axios.create({
+    baseURL: import.meta.env.VITE_API_URL + "/api/auth",
     withCredentials: true,
 });
 
-const authFunc = async (url, method, data) => {
-    try {
-        const response = await authApi.request({ url, method, data });
-        return response.data;
-    } catch (error) {
-        console.error("Error in auth function:", error);
-        throw error;
-    }
-}
-
 export const registerUser = async ({ username, email, password }) => {
     try {
-        const response = await authFunc("/register", "POST", { username, email, password });
+        const response = await authApi.post("/register", { username, email, password });
         return response;
     } catch (error) {
-        console.error("Error registering user:", error);
         throw error;
     }
 }
 
 export const loginUser = async ({ email, password }) => {
     try {
-        const response = await authFunc("/login", "POST", { email, password });
+        const response = await authApi.post("/login", { email, password });
         return response;
     } catch (error) {
-        console.error("Error logging in user:", error);
         throw error;
     }
 }
 
 export const logoutUser = async () => {
     try {
-        const response = await authFunc("/logout", "GET");
+        const response = await authApi.get("/logout");
         return response;
     } catch (error) {
-        console.error("Error logging out user:", error);
         throw error;
     }
 }
 
 export const getMe = async () => {
     try {
-        const response = await authFunc("/get-me", "GET");
+        const response = await authApi.get("/get-me");
         return response;
     } catch (error) {
-        console.error("Error getting current user:", error);
         throw error;
     }
 }

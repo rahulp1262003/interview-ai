@@ -94,7 +94,11 @@ const loginUserController = async (req, res) => {
         // Generate JWT token
         const token = await _jwtGenerateToken({ id: user._id }, '1d');
 
-        res.cookie('token', token, { httpOnly: true });
+        res.cookie('token', token, {
+            httpOnly: true, secure: true,
+            sameSite: 'none',
+            maxAge: 24 * 60 * 60 * 1000
+        });
 
         res.status(200).json({
             message: 'User logged in successfully',
