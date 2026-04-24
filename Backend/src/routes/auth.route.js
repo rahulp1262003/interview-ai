@@ -26,6 +26,13 @@ authRouter.post('/login', authController.loginUserController);
 authRouter.get('/logout', authController.logoutUserController);
 
 /**
+ * @route DELETE /api/auth/delete-account
+ * @desc Delete user account
+ * @access Private
+ */
+authRouter.delete('/delete-account', authMiddleware.authUser, authController.deleteAccountController);
+
+/**
  * @rout GET /api/auth/get-me
  * @desc Get current logged in user info
  * @access Private

@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const authApi = new axios.create({
-    baseURL: import.meta.env.VITE_API_URL + "/api/auth",
+    baseURL: `${import.meta.env.VITE_API_URL}/api/auth`,
     withCredentials: true,
 });
 
@@ -26,6 +26,15 @@ export const loginUser = async ({ email, password }) => {
 export const logoutUser = async () => {
     try {
         const response = await authApi.get("/logout");
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}
+
+export const deleteAccount = async ({ password }) => {
+    try {
+        const response = await authApi.delete("/delete-account", { data: { password } });
         return response;
     } catch (error) {
         throw error;

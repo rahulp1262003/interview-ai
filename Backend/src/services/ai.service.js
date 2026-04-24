@@ -48,8 +48,6 @@ Respond ONLY with a valid JSON object matching this schema exactly — no extra 
 ${JSON.stringify(z.toJSONSchema(interviewReportSchema), null, 2)}
 `;
 
-    console.log("Prompt : ", prompt);
-
     const response = await groq.chat.completions.create({
         model: "llama-3.3-70b-versatile",
         messages: [
@@ -69,7 +67,6 @@ ${JSON.stringify(z.toJSONSchema(interviewReportSchema), null, 2)}
     });
 
     const text = response.choices[0].message.content;
-    console.log("\nResponse from AI : ", text);
     return JSON.parse(text);
 };
 

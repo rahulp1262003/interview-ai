@@ -33,7 +33,7 @@ const Login = () => {
       navigate('/')
     } catch (error) {
       console.error('Login error:', error)
-      message.error('Invalid email or password.')
+      message.error(error.response.data.message)
     }
   }
 

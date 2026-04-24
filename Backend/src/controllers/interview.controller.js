@@ -1,7 +1,9 @@
 const { PDFParse } = require("pdf-parse");
+const { default: mongoose } = require("mongoose");
+
+const { verifyPDFBuffer } = require("../middlewares/file.middleware");
 const interviewReportModel = require("../models/interviewReport.model");
 const { generateInterviewReport } = require("../services/ai.service");
-const { default: mongoose } = require("mongoose");
 
 /**
  * @name generateInterviewReportByAI
@@ -12,21 +14,25 @@ const { default: mongoose } = require("mongoose");
 const generateInterviewReportByAI = async (req, res) => {
     try {
 
-        const resumeFile = req.file;
+        const pdfFile = req.file;
 
-        if (!resumeFile) {
+        if (!pdfFile) {
             return res.status(400).json({
                 success: false,
-                message: "Resume file is required"
+                message: "PDF file is required"
             });
         }
+        // Magic bytes verify karo
+        if (!verifyPDFBuffer(pdfFile.buffer)) {
+            return res.status(400).json({ success: false, message: "Invalid PDF file" });
+        }
 
-        const resumeContent = await (new PDFParse(Uint8Array.from(resumeFile.buffer))).getText();
+        const pdfContent = await (new PDFParse(Uint8Array.from(pdfFile.buffer))).getText();
 
-        if (!resumeContent) {
+        if (!pdfContent) {
             return res.status(400).json({
                 success: false,
-                message: "Failed to parse resume content"
+                message: "Failed to parse PDF content"
             });
         }
 
@@ -39,10 +45,10 @@ const generateInterviewReportByAI = async (req, res) => {
             });
         }
 
-        const interviwReportByAI = await generateInterviewReport({ resume: resumeContent.text, selfDescription, jobDescription });
+        const interviwReportByAI = await generateInterviewReport({ resume: pdfContent.text, selfDescription, jobDescription });
 
         const interviewReport = await interviewReportModel.create({
-            resume: resumeContent.text,
+            resume: pdfContent.text,
             selfDescription: selfDescription,
             jobDescription: jobDescription,
             ...interviwReportByAI,
@@ -57,8 +63,7 @@ const generateInterviewReportByAI = async (req, res) => {
 
 
     } catch (error) {
-        console.log(error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Failed to generate interview report"
         });
@@ -100,8 +105,7 @@ const getInterviewReportById = async (req, res) => {
             data: interviewReport
         });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Failed to fetch interview report"
         });
@@ -168,8 +172,7 @@ const deleteInterviewReport = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
-        res.status(500).json({
+        return res.status(500).json({
             success: false,
             message: "Failed to delete interview report"
         });

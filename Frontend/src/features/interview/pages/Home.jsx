@@ -19,6 +19,7 @@ import {
   Empty,
   Divider,
   Modal,
+  Dropdown,
 } from 'antd'
 import {
   ThunderboltOutlined,
@@ -29,6 +30,8 @@ import {
   ArrowRightOutlined,
   FileOutlined,
   DeleteOutlined,
+  LogoutOutlined,
+  SettingOutlined,
 } from '@ant-design/icons'
 import { useInterview } from '../hooks/useInterview'
 import { useAuth } from '../../auth/hooks/useAuth'
@@ -46,10 +49,45 @@ function Home() {
   const [deleteLoading, setDeleteLoading] = useState(false)
   const { loading, generateReport, reports, fetchAllReports, deleteReportById } = useInterview()
   const navigate = useNavigate()
+  const { user, handleLogout } = useAuth()
 
-  // const { user, loading: authLoading } = useAuth();
+  const onLogout = async () => {
+    try {
+      await handleLogout()
+      navigate('/login')
+    } catch (err) {
+      console.error('Logout failed', err)
+    }
+  }
+
+  const profileMenuItems = [
+    {
+      key: 'info',
+      label: (
+        <div style={{ padding: '4px 0' }}>
+          <div style={{ fontWeight: 600, color: '#e0e0e0', fontSize: 14 }}>{user?.username ?? 'User'}</div>
+          <div style={{ color: '#888', fontSize: 12 }}>{user?.email ?? ''}</div>
+        </div>
+      ),
+      disabled: true,
+    },
+    { type: 'divider' },
+    {
+      key: 'settings',
+      icon: <SettingOutlined />,
+      label: 'Settings',
+      onClick: () => navigate('/settings'),
+    },
+    {
+      key: 'logout',
+      icon: <LogoutOutlined />,
+      label: 'Logout',
+      danger: true,
+      onClick: onLogout,
+    },
+  ]
+
   useEffect(() => {
-    // if (!user || authLoading) return;
     fetchAllReports()
   }, [])
 
@@ -153,6 +191,42 @@ function Home() {
           gap: 32,
         }}
       >
+        {/* Profile Bar */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+          <Dropdown menu={{ items: profileMenuItems }} placement="bottomRight" trigger={['click']}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                cursor: 'pointer',
+                background: '#141414',
+                border: '1px solid #2a2a2a',
+                borderRadius: 40,
+                padding: '6px 16px 6px 6px',
+                transition: 'border-color 0.3s',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#1677ff')}
+              onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#2a2a2a')}
+            >
+              <Avatar
+                size={36}
+                style={{
+                  background: 'linear-gradient(135deg, #1677ff, #003a8c)',
+                  fontWeight: 700,
+                  fontSize: 16,
+                }}
+                icon={!user?.username && <UserOutlined />}
+              >
+                {user?.username?.[0]?.toUpperCase()}
+              </Avatar>
+              <span style={{ color: '#e0e0e0', fontWeight: 500, fontSize: 14 }}>
+                {user?.username ?? 'User'}
+              </span>
+            </div>
+          </Dropdown>
+        </div>
+
         {/* Header */}
         <div style={{ textAlign: 'center', paddingTop: '1rem' }}>
           <Space align="center" style={{ marginBottom: 16 }}>
