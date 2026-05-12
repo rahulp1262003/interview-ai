@@ -46,6 +46,7 @@ export const getMe = async () => {
         const response = await authApi.get("/get-me");
         return response;
     } catch (error) {
+        if (error.response && error.response.status === 401) return null;
         throw error;
     }
 }
